@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>guess animal</title>
+  <style>
+    body, html {
+      margin: 0; padding: 0; height: 100%; overflow: hidden;
+      background: #000; color: #0f0; font-family: sans-serif;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      touch-action: manipulation;
+    }
+    h1 { font-size: 4.5em; text-align: center; margin: 0; user-select: none; }
+  </style>
+</head>
+<body>
+  <h1>Tap anywhere</h1>
+  <audio id="silly" loop preload="auto">
+    <source src="cityboy.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    const audio = document.getElementById('silly');
+
+    // Silent preload (works automatically)
+    audio.muted = true;
+    audio.load();
+    audio.play().catch(() => {});
+
+    // 🔥 THE FIX: Tap detection + instant screen change
+    const blast = () => {
+      // 1. CHANGE SCREEN IMMEDIATELY (this proves the tap worked)
+      document.body.innerHTML = `
+        <h1 style="font-size: 9em; color: #ff0; padding: 20vh 10vw;">
+          
+        </h1>
+        <h2 id="status" style="color:#f00; font-size:1.2em; margin-top:20px;"></h2>
+      `;
+
+      // 2. Now try to play sound
+      audio.muted = false;
+      audio.currentTime = 0;
+      audio.play()
+        .then(() => console.log("✅ CITY BOYYYY SOUND BLASTING!"))
+        .catch(e => {
+          console.log("Sound blocked:", e);
+          const status = document.getElementById('status');
+          if (status) status.textContent = "Sound blocked by browser — refresh & tap again";
+        });
+    };
+
+    // Add listeners (this combo works best on iPhone + Android in 2026)
+    document.body.addEventListener('touchstart', blast, {once: true});
+    document.body.addEventListener('click', blast, {once: true});
+  </script>
+</body>
+</html>
