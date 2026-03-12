@@ -3,57 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title></title>
+  <title>Which Animal Are You?</title>
   <style>
     body, html {
       margin: 0; padding: 0; height: 100%; overflow: hidden;
-      background: #000; color: #0f0; font-family: sans-serif;
+      background: #000; color: #0f0; font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       display: flex; flex-direction: column; justify-content: center; align-items: center;
       touch-action: manipulation;
     }
-    h1 { font-size: 4.5em; text-align: center; margin: 0; user-select: none; }
+    h1 {
+      font-size: 4.8em; text-align: center; margin: 0 20px; user-select: none;
+      line-height: 1.1;
+    }
+    #status {
+      color: #f80; font-size: 1.3em; margin-top: 40px; opacity: 0.8;
+    }
+    .blast {
+      font-size: 10em !important;
+      color: #ff0 !important;
+      text-shadow: 0 0 30px #f90;
+    }
   </style>
 </head>
 <body>
   <h1>Tap anywhere</h1>
   <h1>to see which animal you are</h1>
-  <audio id="silly" loop preload="auto">
+  <div id="status"></div>
+
+  <audio id="silly" preload="auto" loop>
     <source src="cityboy.mp3" type="audio/mpeg">
   </audio>
 
   <script>
     const audio = document.getElementById('silly');
+    const status = document.getElementById('status');
 
-    // Silent preload (works automatically)
+    // Preload silently to try to warm up the audio context
     audio.muted = true;
     audio.load();
-    audio.play().catch(() => {});
+    audio.play().catch(() => {}); // silent unlock attempt
 
-    // 🔥 THE FIX: Tap detection + instant screen change
     const blast = () => {
-      // 1. CHANGE SCREEN IMMEDIATELY (this proves the tap worked)
+      // Immediately replace content (feels instant)
       document.body.innerHTML = `
-        <h1 style="font-size: 9em; color: #ff0; padding: 20vh 10vw;">
-          
-        </h1>
-        <h2 id="status" style="color:#f00; font-size:1.2em; margin-top:20px;"></h2>
+        <h1 class="blast">CITY BOY</h1>
+        <div id="status"></div>
       `;
 
-      // 2. Now try to play sound
-      audio.muted = false;
-      audio.currentTime = 0;
-      audio.play()
-        .then(() => console.log("✅ CITY BOYYYY SOUND BLASTING!"))
-        .catch(e => {
-          console.log("Sound blocked:", e);
-          const status = document.getElementById('status');
-          if (status) status.textContent = "internet problem please refresh";
-        });
+      // Give browser a tiny moment to render + accept the gesture
+      setTimeout(() => {
+        audio.muted = false;
+        audio.currentTime = 0;
+
+        const playPromise = audio.play();
+
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log("CITY BOYYYYYYY 🔥🔥🔥");
+              status.textContent = "🐺🐺🐺 CITY BOY ACTIVATED 🐺🐺🐺";
+            })
+            .catch(e => {
+              console.log("Play failed:", e.name, e.message);
+              // Don't show scary error — just gentle retry hint
+              status.textContent = "Tap again if no sound 🔊";
+              status.style.color = "#ff4444";
+            });
+        }
+      }, 80); // 80ms sweet spot for most iOS/Android devices
     };
 
-    // Add listeners (this combo works best on iPhone + Android in 2026)
-    document.body.addEventListener('touchstart', blast, {once: true});
-    document.body.addEventListener('click', blast, {once: true});
+    // Best gesture combo for 2025–2026 mobile browsers
+    document.addEventListener('touchend', blast, { once: true, passive: true });
+    document.addEventListener('click', blast, { once: true });
+
+    // Fallback: if someone long-presses or weird gesture
+    document.addEventListener('touchstart', e => {
+      if (!audio.dataset.tried) {
+        audio.dataset.tried = "1";
+        audio.muted = true;
+        audio.play().catch(() => {});
+      }
+    }, { passive: true });
   </script>
 </body>
 </html>
