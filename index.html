@@ -3,56 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>guess animal</title>
+  <title>Guess Animal ✨</title>
   <style>
     body, html {
-      margin: 0; padding: 0; height: 100%; overflow: hidden;
-      background: #000; color: #0f0; font-family: sans-serif;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0f0f1f, #000);
+      color: #0f0;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       touch-action: manipulation;
+      transition: background 1.2s ease;
     }
-    h1 { font-size: 4.5em; text-align: center; margin: 0; user-select: none; }
+
+    h1 {
+      font-size: 3.8em;
+      text-align: center;
+      margin: 0 20px;
+      user-select: none;
+      text-shadow: 0 0 30px #0f0, 0 0 60px #0f0;
+      animation: glowPulse 3s infinite alternate;
+    }
+
+    @keyframes glowPulse {
+      0% { text-shadow: 0 0 20px #0f0, 0 0 40px #0f0; }
+      100% { text-shadow: 0 0 40px #0ff, 0 0 80px #0ff; }
+    }
+
+    .blast-screen {
+      background: linear-gradient(45deg, #ff00aa, #00ffff, #ffea00, #00ff9d, #ff3366);
+      background-size: 400% 400%;
+      animation: rainbowShift 8s ease infinite;
+      transition: all 0.8s ease;
+    }
+
+    @keyframes rainbowShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .shine {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 40%, rgba(255,255,255,0.25), transparent 60%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+    }
+
+    .blast-screen .shine {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
-  <h1>Tap anywhere</h1>
+
+  <h1>Tap to see which animal you are ✨</h1>
+
+  <div class="shine"></div>
+
   <audio id="silly" loop preload="auto">
     <source src="cityboy.mp3" type="audio/mpeg">
+    Your browser doesn't support the audio element.
   </audio>
 
   <script>
     const audio = document.getElementById('silly');
 
-    // Silent preload (works automatically)
+    // Silent preload attempt
     audio.muted = true;
     audio.load();
     audio.play().catch(() => {});
 
-    // 🔥 THE FIX: Tap detection + instant screen change
+    // Blast on first tap/click
     const blast = () => {
-      // 1. CHANGE SCREEN IMMEDIATELY (this proves the tap worked)
+      // Change to colorful stunning screen
+      document.body.classList.add('blast-screen');
+
+      // Replace content
       document.body.innerHTML = `
-        <h1 style="font-size: 9em; color: #ff0; padding: 20vh 10vw;">
-          
+        <div class="shine"></div>
+        <h1 style="font-size: 8em; color: #fff; text-shadow: 0 0 60px #fff, 0 0 120px #ff0;">
+          <!-- Empty big text - just visual explosion -->
         </h1>
-        <h2 id="status" style="color:#f00; font-size:1.2em; margin-top:20px;"></h2>
+        <h2 id="status" style="color:#fff; font-size:1.4em; text-shadow: 0 0 20px #f00; margin-top:30px;"></h2>
       `;
 
-      // 2. Now try to play sound
+      // Unmute & play
       audio.muted = false;
       audio.currentTime = 0;
       audio.play()
-        .then(() => console.log("✅ CITY BOYYYY SOUND BLASTING!"))
+        .then(() => console.log("CITY BOY BLASTING!"))
         .catch(e => {
           console.log("Sound blocked:", e);
           const status = document.getElementById('status');
-          if (status) status.textContent = "Sound blocked by browser — refresh & tap again";
+          if (status) status.textContent = "Sound blocked — refresh & tap again";
         });
     };
 
-    // Add listeners (this combo works best on iPhone + Android in 2026)
+    // Listeners
     document.body.addEventListener('touchstart', blast, {once: true});
     document.body.addEventListener('click', blast, {once: true});
   </script>
+
 </body>
 </html>
